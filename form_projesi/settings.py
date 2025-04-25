@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
+from urllib.parse import urlparse
 
 load_dotenv()
 
@@ -43,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'kullanici',  # Kullanıcı uygulamamız
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -152,3 +154,29 @@ MESSAGE_TAGS = {
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
 }
+
+# CloudCube/S3 ayarları
+if 'CLOUDCUBE_URL' in os.environ:
+    CLOUDCUBE_URL = os.environ.get('CLOUDCUBE_URL')
+    CLOUDCUBE_ACCESS_KEY_ID = os.environ.get('CLOUDCUBE_ACCESS_KEY_ID')
+    CLOUDCUBE_SECRET_ACCESS_KEY = os.environ.get('CLOUDCUBE_SECRET_ACCESS_KEY')
+    
+    # CloudCube URL'inden bucket ve prefix bilgilerini ayıklama
+    CLOUDCUBE_PARTS = urlparse(CLOUDCUBE_URL)
+    CLOUDCUBE_BUCKET = CLOUDCUBE_PARTS.netloc.split('.')[0]
+    CLOUDCUBE_PREFIX = CLOUDCUBE_PARTS.path.lstrip('/')
+    
+    # S3 depolama ayarları
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    AWS_S3_REGION_NAME = 'us-east-1'  # CloudCube'un bulunduğu bölge
+    AWS_S3_ENDPOINT_URL = f'https://{CLOUDCUBE_PARTS.netloc}'
+    AWS_ACCESS_KEY_ID = CLOUDCUBE_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY = CLOUDCUBE_SECRET_ACCESS_KEY
+    AWS_STORAGE_BUCKET_NAME = CLOUDCUBE_BUCKET
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_QUERYSTRING_AUTH = False
+    AWS_S3_CUSTOM_DOMAIN = f'{CLOUDCUBE_BUCKET}.s3.amazonaws.com'
+    
+    # Medya dosyaları için
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{CLOUDCUBE_PREFIX}/public/'
+    MEDIA_ROOT = f'{CLOUDCUBE_PREFIX}/public/'
