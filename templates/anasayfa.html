@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Ana Sayfa{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10 form-container">
+        <h2 class="mb-4 text-center">Kayıtlı Kullanıcılar</h2>
+        
+        <div class="text-end mb-3">
+            <a href="{% url 'kullanici_formu' %}" class="btn btn-primary">Yeni Kullanıcı Ekle</a>
+        </div>
+        
+        {% if kullanicilar %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Profil Resmi</th>
+                            <th>İsim</th>
+                            <th>Doğum Tarihi</th>
+                            <th>Kayıt Tarihi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for kullanici in kullanicilar %}
+                        <tr>
+                            <td>
+                                {% if kullanici.profil_resmi %}
+                                    <img src="{{ kullanici.profil_resmi.url }}" alt="{{ kullanici.isim }}" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
+                                {% else %}
+                                    <span class="text-muted">Resim yok</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ kullanici.isim }}</td>
+                            <td>{{ kullanici.dogum_tarihi }}</td>
+                            <td>{{ kullanici.olusturma_tarihi|date:"d.m.Y H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                Henüz kayıtlı kullanıcı bulunmamaktadır. Yeni bir kullanıcı eklemek için "Yeni Kullanıcı Ekle" butonuna tıklayın.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 
